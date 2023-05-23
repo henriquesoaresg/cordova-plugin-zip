@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+import android.content.Intent;
 
 public class Zip extends CordovaPlugin {
 
@@ -26,6 +27,19 @@ public class Zip extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, CordovaArgs args, final CallbackContext callbackContext) throws JSONException {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R && !android.os.Environment.isExternalStorageManager()) {
+            try {
+                Intent intent = new Intent();
+                intent.setAction(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", cordova.getContext().getPackageName(), null);
+                intent.setData(uri);
+                cordova.getActivity().startActivity(intent);
+            } catch (Exception e) {
+                Intent intent = new Intent();
+                intent.setAction(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                cordova.getActivity().startActivity(intent);
+            }
+        }
         if ("unzip".equals(action)) {
             unzip(args, callbackContext);
             return true;
